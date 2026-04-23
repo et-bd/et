@@ -494,6 +494,58 @@ input,select{font-family:var(--fb)}
 .fst.ylw .fst-num{color:var(--warn)}
 .fst.rd .fst-num{color:var(--sos)}
 .fst.bl .fst-num{color:var(--blue)}
+
+/* ── VOICE SECRET CODE ── */
+.voice-panel{width:100%;background:var(--bg1);border:1.5px solid var(--bdr);border-radius:var(--r2);padding:16px;display:flex;flex-direction:column;gap:12px}
+.voice-panel.listening{border-color:rgba(255,36,66,.45);background:rgba(255,36,66,.03)}
+.voice-panel.armed{border-color:rgba(0,214,143,.4);background:rgba(0,214,143,.03)}
+.vp-top{display:flex;align-items:center;justify-content:space-between}
+.vp-title{display:flex;align-items:center;gap:8px;font-family:var(--fd);font-size:14px;font-weight:800}
+.vp-badge{font-size:9px;padding:2px 8px;border-radius:6px;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+.vp-badge.off{background:var(--bg3);color:var(--t3)}
+.vp-badge.on{background:rgba(255,36,66,.15);color:var(--sos)}
+.vp-badge.armed{background:rgba(0,214,143,.12);color:var(--safe)}
+.vp-sub{font-size:11px;color:var(--t2);line-height:1.5}
+
+.code-display{display:flex;align-items:center;justify-content:space-between;background:var(--bg2);border:1px solid var(--bdr2);border-radius:var(--r);padding:10px 14px}
+.code-text{font-family:var(--fd);font-size:18px;font-weight:700;letter-spacing:2px;color:var(--t1);flex:1}
+.code-text.hidden-code{letter-spacing:4px;color:var(--t3)}
+.code-reveal-btn{font-size:11px;font-weight:700;color:var(--blue);padding:4px 8px;background:var(--blue-s);border:1px solid rgba(37,99,255,.2);border-radius:6px}
+
+.wave-container{height:40px;display:flex;align-items:center;justify-content:center;gap:3px;opacity:0;transition:opacity .3s}
+.wave-container.active{opacity:1}
+.wave-bar{width:4px;border-radius:3px;background:var(--sos);animation:wavePulse 1s ease-in-out infinite}
+.wave-bar:nth-child(1){animation-delay:0s;height:10px}
+.wave-bar:nth-child(2){animation-delay:.1s;height:20px}
+.wave-bar:nth-child(3){animation-delay:.2s;height:30px}
+.wave-bar:nth-child(4){animation-delay:.3s;height:22px}
+.wave-bar:nth-child(5){animation-delay:.2s;height:35px}
+.wave-bar:nth-child(6){animation-delay:.1s;height:25px}
+.wave-bar:nth-child(7){animation-delay:0s;height:14px}
+.wave-bar:nth-child(8){animation-delay:.15s;height:28px}
+.wave-bar:nth-child(9){animation-delay:.25s;height:18px}
+@keyframes wavePulse{0%,100%{transform:scaleY(1);opacity:.7}50%{transform:scaleY(1.8);opacity:1}}
+
+.heard-text{font-size:11px;color:var(--t2);text-align:center;min-height:18px;font-style:italic;transition:color .2s}
+.heard-text.match{color:var(--safe);font-style:normal;font-weight:700}
+.heard-text.nomatch{color:var(--t3)}
+
+.mic-btn{width:100%;padding:13px;border-radius:var(--r2);font-family:var(--fd);font-size:14px;font-weight:800;letter-spacing:.3px;border:none;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.mic-btn.start{background:linear-gradient(135deg,var(--sos),#C8001A);color:#fff;box-shadow:0 4px 18px var(--sos-g)}
+.mic-btn.stop{background:var(--bg2);color:var(--t2);border:1.5px solid var(--bdr2)}
+.mic-btn:active{transform:scale(.97)}
+
+/* Change code overlay */
+.change-code-area{display:none;flex-direction:column;gap:8px;padding-top:10px;border-top:1px solid var(--bdr)}
+.change-code-area.open{display:flex}
+.cc-input{background:var(--bg2);border:1.5px solid var(--bdr);border-radius:var(--r);padding:10px 13px;color:var(--t1);font-size:15px;font-weight:700;letter-spacing:2px;width:100%;outline:none;font-family:var(--fd);transition:border-color .2s}
+.cc-input:focus{border-color:rgba(37,99,255,.4)}
+
+/* Secret code setup overlay */
+.sc-setup-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--bdr)}
+.sc-setup-row:last-child{border:none}
+.sc-setup-label{font-size:12px;font-weight:600;color:var(--t1)}
+.sc-setup-sub{font-size:10px;color:var(--t2);margin-top:2px}
 </style>
 </head>
 <body>
@@ -820,6 +872,71 @@ input,select{font-family:var(--fb)}
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
+<!-- VOICE CODE SETUP OVERLAY -->
+<div class="overlay" id="voiceSetupOv">
+  <div class="ov-box">
+    <div class="ov-handle"></div>
+    <button class="ov-close" onclick="closeOv('voiceSetupOv')">✕</button>
+    <div style="font-family:var(--fd);font-size:18px;font-weight:800;margin-bottom:3px">🎙️ Secret Code Setup</div>
+    <div style="font-size:12px;color:var(--t2);margin-bottom:16px">Speak this phrase anytime to trigger emergency SOS — even with your phone in your pocket</div>
+
+    <!-- Current code display -->
+    <div style="margin-bottom:14px">
+      <div style="font-size:10px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Your Secret Code</div>
+      <div class="code-display">
+        <div class="code-text hidden-code" id="setupCodeText">••••••••</div>
+        <button class="code-reveal-btn" id="setupRevealBtn" onclick="toggleCodeReveal()">Show</button>
+      </div>
+    </div>
+
+    <!-- Change code -->
+    <div style="margin-bottom:14px">
+      <button class="btn btn-ghost btn-full" style="font-size:12px;margin-bottom:8px" onclick="openChangeCode()">✏️ Change Secret Code</button>
+      <div class="change-code-area" id="changeCodeArea">
+        <div style="font-size:11px;color:var(--t2)">Enter your new secret code (3–6 words work best)</div>
+        <input class="cc-input" id="newCodeInput" placeholder="e.g. SafeReach Help Me" maxlength="50">
+        <div style="display:flex;gap:7px">
+          <button class="btn btn-blue" style="flex:1;font-size:12px" onclick="saveNewCode()">✓ Save Code</button>
+          <button class="btn btn-ghost" style="font-size:12px" onclick="closeChangeCode()">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Options -->
+    <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r2);padding:0 2px;margin-bottom:14px">
+      <div class="sc-setup-row" style="padding:12px 12px">
+        <div>
+          <div class="sc-setup-label">🔊 Voice Sensitivity</div>
+          <div class="sc-setup-sub">How closely the phrase must match</div>
+        </div>
+        <select id="sensitivitySel" onchange="ST.sensitivity=this.value" style="background:var(--bg3);border:1px solid var(--bdr);border-radius:7px;color:var(--t1);padding:5px 9px;font-size:11px;font-weight:700;font-family:var(--fb)">
+          <option value="high">High — exact</option>
+          <option value="medium" selected>Medium</option>
+          <option value="low">Low — partial</option>
+        </select>
+      </div>
+      <div class="sc-setup-row" style="padding:12px 12px">
+        <div>
+          <div class="sc-setup-label">⚡ Auto-arm on app open</div>
+          <div class="sc-setup-sub">Start listening when app launches</div>
+        </div>
+        <div class="toggle" id="autoArmToggle" onclick="toggleAutoArm()"></div>
+      </div>
+      <div class="sc-setup-row" style="padding:12px 12px">
+        <div>
+          <div class="sc-setup-label">📳 Vibrate on detection</div>
+          <div class="sc-setup-sub">Haptic feedback when code heard</div>
+        </div>
+        <div class="toggle on" id="vibrateToggle" onclick="toggleVibrate()"></div>
+      </div>
+    </div>
+
+    <!-- Test button -->
+    <button class="btn btn-ghost btn-full" style="font-size:12px;margin-bottom:8px" onclick="testVoice()">🎤 Test Voice Recognition</button>
+    <button class="mic-btn start" onclick="closeOv('voiceSetupOv');nav('sos');setTimeout(startVoiceArm,300)">🛡️ Arm Now &amp; Go to SOS</button>
+  </div>
+</div>
+
 <!-- ════════════════════════════════════════
      HOME PAGE
 ════════════════════════════════════════ -->
@@ -870,6 +987,11 @@ input,select{font-family:var(--fb)}
       <div class="ac-icon-sm">💬</div>
       <div class="ac-title-sm">SOS SMS</div>
       <div class="ac-sub-sm">With live location</div>
+    </button>
+    <button class="action-card" style="background:rgba(255,36,66,.07);border:1px solid rgba(255,36,66,.18)" onclick="openVoiceFromHome()">
+      <div class="ac-icon-sm">🎙️</div>
+      <div class="ac-title-sm" style="color:var(--sos)">Voice Code</div>
+      <div class="ac-sub-sm" id="homeVoiceStatus">Hands-free SOS</div>
     </button>
     <a class="action-card ac-999" href="tel:999" style="display:flex">
       <div class="ac-icon-sm">📞</div>
@@ -970,11 +1092,44 @@ input,select{font-family:var(--fb)}
       <button class="cancel-sos-btn" id="cancelBtn" onclick="cancelSOS()">✕ Cancel Emergency (tap 3×)</button>
     </div>
     <a href="tel:999" class="btn btn-red btn-full" style="font-size:15px;font-family:var(--fd);box-shadow:0 6px 22px var(--sos-g);border-radius:var(--r2)">📞 Call 999 — Bangladesh Police</a>
+
+    <!-- VOICE SECRET CODE PANEL -->
+    <div class="voice-panel" id="voicePanel">
+      <div class="vp-top">
+        <div class="vp-title">🎙️ Secret Code SOS <span class="vp-badge off" id="vpBadge">OFF</span></div>
+        <button style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;color:var(--t2)" onclick="openOv('voiceSetupOv')">⚙️ Setup</button>
+      </div>
+      <div class="vp-sub" id="vpSub">Say your secret code to trigger SOS instantly — hands-free, no touch required</div>
+
+      <!-- Code display strip -->
+      <div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg2);border:1px solid var(--bdr2);border-radius:var(--r);padding:9px 13px">
+        <div style="font-size:10px;color:var(--t3);font-weight:700;text-transform:uppercase;letter-spacing:.4px">Your code</div>
+        <div class="code-text hidden-code" id="sosCodeDisplay" style="font-size:14px;letter-spacing:3px">••••••••</div>
+        <button class="code-reveal-btn" id="sosRevealBtn" onclick="toggleSOSCodeReveal()">Show</button>
+      </div>
+
+      <!-- Sound wave animation -->
+      <div class="wave-container" id="waveAnim">
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+      </div>
+      <div class="heard-text" id="heardText">Tap below to arm listening</div>
+
+      <button class="mic-btn start" id="micBtn" onclick="toggleVoiceArm()">🎙️ Arm Voice Listener</button>
+    </div>
     <div class="sos-quick">
       <button class="sq-btn" onclick="startRTLoc()"><div class="sq-icon">📍</div><div class="sq-label">Live GPS</div><div class="sq-sub">Track me</div></button>
       <button class="sq-btn" onclick="sendSOSSMS()"><div class="sq-icon">💬</div><div class="sq-label">SOS SMS</div><div class="sq-sub">With location</div></button>
       <button class="sq-btn" onclick="nav('map')"><div class="sq-icon">🚔</div><div class="sq-label">Police</div><div class="sq-sub">Near me</div></button>
       <button class="sq-btn" onclick="nav('track')"><div class="sq-icon">📡</div><div class="sq-label">Share Track</div><div class="sq-sub" id="sosCCount">Live link</div></button>
+      <button class="sq-btn" onclick="openOv('voiceSetupOv')"><div class="sq-icon">🎙️</div><div class="sq-label">Voice Code</div><div class="sq-sub" id="voiceStatusSub">Tap to setup</div></button>
     </div>
   </div>
 </div>
@@ -1284,6 +1439,11 @@ input,select{font-family:var(--fb)}
     </div>
     <!-- Settings -->
     <div class="settings-card">
+      <div class="s-row" onclick="openOv('voiceSetupOv')">
+        <div class="s-ico" style="background:rgba(255,36,66,.08)">🎙️</div>
+        <div class="s-text"><h4>Secret Code SOS</h4><p>Voice-activated emergency trigger</p></div>
+        <div id="voiceSettingStatus" style="font-size:9px;font-weight:700;color:var(--t3);padding:2px 8px;background:var(--bg3);border-radius:6px">OFF</div>
+      </div>
       <div class="s-row" onclick="toast('🔔 Notification settings','blue')">
         <div class="s-ico" style="background:rgba(255,184,0,.1)">🔔</div>
         <div class="s-text"><h4>Notifications</h4><p>SOS alerts, friend requests, tracking updates</p></div>
@@ -1998,13 +2158,271 @@ function cancelSOS(){
 })();
 
 /* ═══════════════════════════════════════
-   INIT
+   VOICE SECRET CODE SYSTEM
 ═══════════════════════════════════════ */
+const VOICE_ST={
+  armed:false,
+  listening:false,
+  recognition:null,
+  code:'SafeReach Help',  // default secret code
+  sensitivity:'medium',
+  autoArm:false,
+  vibrate:true,
+  codeRevealed:false,
+  sosCodeRevealed:false,
+  testMode:false,
+};
+
+// --- Helpers ---
+function normalizeStr(s){
+  return s.toLowerCase().replace(/[^a-z0-9\s]/g,'').replace(/\s+/,' ').trim();
+}
+
+function codeMatch(heard,code){
+  const h=normalizeStr(heard);
+  const c=normalizeStr(code);
+  if(VOICE_ST.sensitivity==='high') return h===c;
+  if(VOICE_ST.sensitivity==='medium') return h.includes(c)||c.split(' ').filter(w=>w.length>2).every(w=>h.includes(w));
+  // low - any significant word match
+  const cWords=c.split(' ').filter(w=>w.length>3);
+  const matches=cWords.filter(w=>h.includes(w));
+  return matches.length>=Math.max(1,Math.ceil(cWords.length*0.5));
+}
+
+function updateVoiceUI(){
+  const panel=document.getElementById('voicePanel');
+  const badge=document.getElementById('vpBadge');
+  const sub=document.getElementById('vpSub');
+  const micBtn=document.getElementById('micBtn');
+  const wave=document.getElementById('waveAnim');
+  const statusSub=document.getElementById('voiceStatusSub');
+  const settingStatus=document.getElementById('voiceSettingStatus');
+
+  if(VOICE_ST.armed){
+    panel?.classList.add('armed');
+    panel?.classList.remove('listening');
+    if(badge){badge.textContent='ARMED';badge.className='vp-badge armed';}
+    if(sub)sub.textContent='🟢 Listening for your secret code... Say it aloud to trigger SOS';
+    if(micBtn){micBtn.className='mic-btn stop';micBtn.innerHTML='🔇 Disarm Voice Listener';}
+    if(wave)wave.classList.add('active');
+    if(statusSub)statusSub.textContent='Armed ✓';
+    if(settingStatus){settingStatus.textContent='ON';settingStatus.style.color='var(--safe)';settingStatus.style.background='rgba(0,214,143,.12)';}
+  } else {
+    panel?.classList.remove('armed','listening');
+    if(badge){badge.textContent='OFF';badge.className='vp-badge off';}
+    if(sub)sub.textContent='Say your secret code to trigger SOS instantly — hands-free, no touch required';
+    if(micBtn){micBtn.className='mic-btn start';micBtn.innerHTML='🎙️ Arm Voice Listener';}
+    if(wave)wave.classList.remove('active');
+    if(statusSub)statusSub.textContent='Tap to setup';
+    if(settingStatus){settingStatus.textContent='OFF';settingStatus.style.color='var(--t3)';settingStatus.style.background='var(--bg3)';}
+  }
+}
+
+function startVoiceArm(){
+  if(!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)){
+    toast('⚠️ Your browser doesn\'t support voice. Try Chrome.','red');
+    return;
+  }
+  const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+  const recog=new SpeechRecognition();
+  recog.continuous=true;
+  recog.interimResults=true;
+  recog.lang='en-US';
+  recog.maxAlternatives=3;
+
+  recog.onresult=(event)=>{
+    const heardEl=document.getElementById('heardText');
+    let finalTxt='';
+    let interimTxt='';
+    for(let i=event.resultIndex;i<event.results.length;i++){
+      const t=event.results[i][0].transcript;
+      if(event.results[i].isFinal) finalTxt+=t;
+      else interimTxt+=t;
+    }
+    const display=finalTxt||interimTxt;
+    if(heardEl && display){
+      if(VOICE_ST.testMode){
+        heardEl.textContent='Heard: "'+display+'"';
+        heardEl.className='heard-text';
+      } else {
+        heardEl.textContent='Listening... "'+display.slice(-30)+'"';
+      }
+    }
+    if(finalTxt && VOICE_ST.armed){
+      if(codeMatch(finalTxt,VOICE_ST.code)){
+        if(heardEl){heardEl.textContent='✅ CODE MATCHED — Triggering SOS!';heardEl.className='heard-text match';}
+        if(VOICE_ST.vibrate && navigator.vibrate) navigator.vibrate([100,50,100,50,300]);
+        toast('🎙️ Secret code detected! Triggering SOS...','red');
+        stopVoiceArm();
+        setTimeout(()=>{
+          if(!ST.user){openOv('loginOv');return;}
+          nav('sos');
+          setTimeout(()=>{openOv('sosModal');},400);
+        },600);
+      } else if(VOICE_ST.testMode){
+        if(heardEl){heardEl.textContent='❌ No match for: "'+finalTxt+'"';heardEl.className='heard-text nomatch';}
+      }
+    }
+  };
+
+  recog.onerror=(e)=>{
+    if(e.error==='not-allowed'){
+      toast('🎙️ Microphone access denied. Enable in browser settings.','red');
+      stopVoiceArm();
+    } else if(e.error==='no-speech'){
+      // Normal — keep running
+    } else {
+      console.log('SpeechRecognition error:',e.error);
+    }
+  };
+
+  recog.onend=()=>{
+    // Auto-restart if still armed
+    if(VOICE_ST.armed){
+      try{recog.start();}catch(err){}
+    }
+  };
+
+  try{
+    recog.start();
+    VOICE_ST.recognition=recog;
+    VOICE_ST.armed=true;
+    updateVoiceUI();
+    toast('🎙️ Voice listener armed — say your secret code!','green');
+    const heardEl=document.getElementById('heardText');
+    if(heardEl){heardEl.textContent='Listening... say your code';heardEl.className='heard-text';}
+  } catch(err){
+    toast('⚠️ Could not start microphone: '+err.message,'red');
+  }
+}
+
+function stopVoiceArm(){
+  VOICE_ST.armed=false;
+  VOICE_ST.testMode=false;
+  if(VOICE_ST.recognition){
+    try{VOICE_ST.recognition.stop();}catch(e){}
+    VOICE_ST.recognition=null;
+  }
+  updateVoiceUI();
+  const heardEl=document.getElementById('heardText');
+  if(heardEl){heardEl.textContent='Voice listener disarmed';heardEl.className='heard-text';}
+}
+
+function toggleVoiceArm(){
+  if(!ST.user){toast('Please login first to use voice SOS','red');openOv('loginOv');return;}
+  if(VOICE_ST.armed) stopVoiceArm();
+  else startVoiceArm();
+}
+
+// --- Code display toggles ---
+function toggleCodeReveal(){
+  VOICE_ST.codeRevealed=!VOICE_ST.codeRevealed;
+  const el=document.getElementById('setupCodeText');
+  const btn=document.getElementById('setupRevealBtn');
+  if(el){el.textContent=VOICE_ST.codeRevealed?VOICE_ST.code:'••••••••';el.className='code-text'+(VOICE_ST.codeRevealed?'':' hidden-code');}
+  if(btn)btn.textContent=VOICE_ST.codeRevealed?'Hide':'Show';
+}
+
+function toggleSOSCodeReveal(){
+  VOICE_ST.sosCodeRevealed=!VOICE_ST.sosCodeRevealed;
+  const el=document.getElementById('sosCodeDisplay');
+  const btn=document.getElementById('sosRevealBtn');
+  if(el){el.textContent=VOICE_ST.sosCodeRevealed?VOICE_ST.code:'••••••••';el.className='code-text'+(VOICE_ST.sosCodeRevealed?'':' hidden-code');}
+  if(btn)btn.textContent=VOICE_ST.sosCodeRevealed?'Hide':'Show';
+}
+
+// --- Change code ---
+function openChangeCode(){
+  const area=document.getElementById('changeCodeArea');
+  if(area)area.classList.add('open');
+  const inp=document.getElementById('newCodeInput');
+  if(inp)inp.value='';
+  setTimeout(()=>inp?.focus(),100);
+}
+
+function closeChangeCode(){
+  document.getElementById('changeCodeArea')?.classList.remove('open');
+}
+
+function saveNewCode(){
+  const inp=document.getElementById('newCodeInput');
+  const val=inp?.value.trim();
+  if(!val||val.length<3){toast('Code must be at least 3 characters','red');return;}
+  VOICE_ST.code=val;
+  // Update displays
+  const st=document.getElementById('setupCodeText');
+  if(st){st.textContent='••••••••';st.className='code-text hidden-code';}
+  VOICE_ST.codeRevealed=false;
+  document.getElementById('setupRevealBtn').textContent='Show';
+  const sd=document.getElementById('sosCodeDisplay');
+  if(sd){sd.textContent='••••••••';sd.className='code-text hidden-code';}
+  VOICE_ST.sosCodeRevealed=false;
+  document.getElementById('sosRevealBtn').textContent='Show';
+  closeChangeCode();
+  toast('🔒 Secret code updated!','green');
+  // If currently armed, restart recognition with new code
+  if(VOICE_ST.armed){stopVoiceArm();setTimeout(startVoiceArm,500);}
+}
+
+// --- Toggle options ---
+function toggleAutoArm(){
+  VOICE_ST.autoArm=!VOICE_ST.autoArm;
+  document.getElementById('autoArmToggle')?.classList.toggle('on',VOICE_ST.autoArm);
+  toast(VOICE_ST.autoArm?'🔒 Auto-arm enabled':'Auto-arm disabled','');
+}
+
+function toggleVibrate(){
+  VOICE_ST.vibrate=!VOICE_ST.vibrate;
+  document.getElementById('vibrateToggle')?.classList.toggle('on',VOICE_ST.vibrate);
+  toast(VOICE_ST.vibrate?'📳 Vibration on':'Vibration off','');
+}
+
+// --- Test mode ---
+function testVoice(){
+  if(!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)){
+    toast('⚠️ Voice not supported. Use Chrome.','red');return;
+  }
+  if(!VOICE_ST.armed){
+    // Start temp recognition for test
+    VOICE_ST.testMode=true;
+    startVoiceArm();
+    closeOv('voiceSetupOv');
+    nav('sos');
+    toast('🎤 Test mode: say your code now...','blue');
+  } else {
+    VOICE_ST.testMode=true;
+    closeOv('voiceSetupOv');
+    nav('sos');
+    toast('🎤 Test: say your code now...','blue');
+  }
+}
+
+// Home action card for voice
+function openVoiceFromHome(){
+  if(!ST.user){toast('Login first','red');openOv('loginOv');return;}
+  openOv('voiceSetupOv');
+}
 (function init(){
   renderContacts();
   animateFriendPins();
   // Auto login prompt after short delay if not logged in
   if(!ST.user) setTimeout(()=>openOv('loginOv'),1200);
+
+  // Patch updateVoiceUI to also refresh home card
+  const _orig=updateVoiceUI;
+  window.updateVoiceUI=function(){
+    _orig();
+    const hvc=document.getElementById('homeVoiceStatus');
+    if(hvc) hvc.textContent=VOICE_ST.armed?'🎙️ Armed — listening':'Hands-free SOS';
+  };
+
+  // Populate setup overlay code display on open
+  document.getElementById('voiceSetupOv')?.addEventListener('click',function once(){
+    const el=document.getElementById('setupCodeText');
+    if(el && el.textContent==='••••••••'){
+      // already hidden — good
+    }
+  });
 })();
 </script>
 </body>
